@@ -10,12 +10,12 @@ class GazeTracker:
         self.face_mesh = self.mp_face_mesh.FaceMesh(
             static_image_mode=False,
             max_num_faces=1,
-            refine_landmarks=True,   # REQUIRED for iris
+            refine_landmarks=True,  
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5
         )
 
-        # Correct MediaPipe Iris landmark indices
+
         self.LEFT_IRIS = [474, 475, 476, 477]
         self.RIGHT_IRIS = [469, 470, 471, 472]
 
@@ -31,7 +31,7 @@ class GazeTracker:
 
         h, w, _ = frame.shape
 
-        # Convert to RGB
+       
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self.face_mesh.process(rgb)
 
@@ -40,22 +40,21 @@ class GazeTracker:
 
         face_landmarks = results.multi_face_landmarks[0]
 
-        # Extract iris centers
+
         left_iris = self._get_iris_center(face_landmarks, self.LEFT_IRIS, w, h)
         right_iris = self._get_iris_center(face_landmarks, self.RIGHT_IRIS, w, h)
 
         if left_iris is None or right_iris is None:
             return None, frame
 
-        # Average gaze point
         gaze_x = (left_iris[0] + right_iris[0]) / 2
         gaze_y = (left_iris[1] + right_iris[1]) / 2
 
-        # Normalize (0–1)
+    
         gaze_x_norm = gaze_x / w
         gaze_y_norm = gaze_y / h
 
-        # Debug visuals
+        
         cv2.circle(frame, left_iris, 4, (0, 255, 0), -1)
         cv2.circle(frame, right_iris, 4, (0, 255, 0), -1)
         cv2.circle(frame, (int(gaze_x), int(gaze_y)), 6, (0, 0, 255), -1)
